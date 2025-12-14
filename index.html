@@ -27,32 +27,26 @@
 
     <main>
         <div class="row">
-            <article class="s12 m6">
-                <!-- QR Code Tab -->
-                <nav class="tabs">
-                    <button class="tab-btn active" onclick="switchTab(event, 'qr')" style="text-transform: none;">
-                        <i>qr_code_2</i>
-                        QRコード
-                    </button>
-                    <button class="tab-btn" onclick="switchTab(event, 'manual')" style="text-transform: none;">
-                        <i>edit</i>
-                        手入力
-                    </button>
-                </nav>
+            <!-- Add Account Panel -->
+            <article class="s12 m6" id="add-panel">
+                <div class="tabs min">
+                    <a class="vertical" onclick="switchTab(event, 'qr')"><i>qr_code_2</i>QRコード</a>
+                    <a class="vertical active" onclick="switchTab(event, 'manual')"><i>edit</i>手入力</a>
+                </div>
 
-                <div id="qr-tab" class="tab-content active" style="padding: 0 16px;">
+                <!-- QR Code Tab -->
+                <div class="page padding left" id="qr-page">
                     <h5>QRコードから追加</h5>
-                    <p>Google AuthenticatorやMicrosoft Authenticatorなどのサービスから
-                        表示されるQRコードを読み込んでください。</p>
+                    <p>Google Authenticator や Microsoft Authenticator などのサービスから表示される QR コードを読み込んでください。</p>
                     
-                    <div class="field label" style="margin-top: 20px;">
+                    <div class="field label border" style="margin-top: 20px;">
                         <input type="file" id="qr-file" accept="image/*" />
                         <label>QRコード画像</label>
                     </div>
 
                     <p style="margin: 20px 0; opacity: 0.7; text-align: center;">または</p>
 
-                    <div class="field label">
+                    <div class="field label border">
                         <input type="file" id="qr-camera" accept="image/*" capture="environment" />
                         <label>カメラで撮影</label>
                     </div>
@@ -64,26 +58,27 @@
                     <canvas id="qr-canvas" style="display: none;"></canvas>
                 </div>
 
-                <div id="manual-tab" class="tab-content" style="padding: 0 16px;">
+                <!-- Manual Input Tab -->
+                <div class="page padding left active" id="manual-page">
                     <h5>手動で追加</h5>
                     <p>シークレットキーを直接入力して追加できます。</p>
                     
-                    <div class="field label" style="margin-top: 20px;">
+                    <div class="field label border" style="margin-top: 20px;">
                         <input type="text" id="account-name" placeholder=" " />
                         <label>アカウント名</label>
-                        <span class="helper">例: GitHub, Gmail, AWS</span>
+                        <output>例: GitHub, Gmail, AWS</output>
                     </div>
 
-                    <div class="field label">
+                    <div class="field label border">
                         <input type="text" id="issuer-name" placeholder=" " />
                         <label>発行者 (オプション)</label>
-                        <span class="helper">例: github.com, google.com</span>
+                        <output>例: github.com, google.com</output>
                     </div>
 
-                    <div class="field label">
+                    <div class="field label border">
                         <input type="text" id="secret-key" placeholder=" " />
                         <label>シークレットキー</label>
-                        <span class="helper">Base32エンコードされたキーを入力してください</span>
+                        <output>Base32 エンコードされたキーを入力してください</output>
                     </div>
 
                     <button onclick="addAccountManual()" style="margin-top: 16px;">
@@ -93,13 +88,14 @@
                 </div>
             </article>
 
-            <article class="s12 m6">
-                <h5 style="margin-top: 0;">登録済みアカウント</h5>
+            <!-- Accounts List Panel -->
+            <article class="s12 m6" id="list-panel">
+                <h5>登録済みアカウント</h5>
                 <p style="opacity: 0.7;">
-                    <strong id="account-count">0</strong>個のアカウントが登録されています
+                    <strong id="account-count">0</strong> 個のアカウントが登録されています
                 </p>
 
-                <div id="accounts-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <div id="accounts-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
                     <div style="padding: 32px 16px; text-align: center; opacity: 0.6;">
                         <p>アカウントがまだ登録されていません</p>
                         <p style="font-size: 0.9em;">左のパネルから追加してください</p>
@@ -116,11 +112,15 @@
         // Tab switching
         function switchTab(e, tabName) {
             e.preventDefault();
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            e.target.closest('.tab-btn').classList.add('active');
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            // Update tab buttons
+            const addPanel = document.getElementById('add-panel');
+            addPanel.querySelectorAll('.tabs a').forEach(btn => btn.classList.remove('active'));
+            e.target.closest('a').classList.add('active');
+            
+            // Update pages
+            addPanel.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(`${tabName}-page`).classList.add('active');
         }
 
         // Load accounts from localStorage
@@ -148,7 +148,7 @@
             }
 
             if (!/^[A-Z2-7=]+$/.test(secret)) {
-                alert('シークレットキーはBase32形式である必要があります');
+                alert('シークレットキーは Base32 形式である必要があります');
                 return;
             }
 
@@ -195,7 +195,7 @@
                     if (code) {
                         parseOTPAuth(code.data);
                     } else {
-                        alert('QRコードが読み込めません');
+                        alert('QR コードが読み込めません');
                     }
                 };
                 img.src = e.target.result;
@@ -221,7 +221,7 @@
                 document.getElementById('qr-file').value = '';
                 document.getElementById('qr-camera').value = '';
             } catch (error) {
-                alert('QRコードの解析に失敗しました: ' + error.message);
+                alert('QR コードの解析に失敗しました: ' + error.message);
             }
         }
 
@@ -271,26 +271,25 @@
             }
 
             container.innerHTML = accounts.map(account => `
-                <div class="surface-container-high" style="border-radius: 12px; padding: 16px;">
-                    <div style="margin-bottom: 12px;">
-                        <h6 style="margin: 0 0 4px 0;">${escapeHtml(account.name)}</h6>
-                        <p style="margin: 0; opacity: 0.7; font-size: 0.85em;">${escapeHtml(account.issuer)}</p>
+                <article>
+                    <h6 style="margin: 0 0 4px 0;">${escapeHtml(account.name)}</h6>
+                    <p style="margin: 0 0 12px 0; opacity: 0.7; font-size: 0.85em;">${escapeHtml(account.issuer)}</p>
+                    
+                    <div style="background: var(--surface-dim); border-radius: 8px; padding: 16px; margin-bottom: 12px; text-align: center;">
+                        <code id="code-${account.id}" style="font-size: 1.8em; font-weight: bold; letter-spacing: 4px; font-family: monospace;">${generateTOTP(account.secret)}</code>
                     </div>
-                    <div style="background: var(--surface-dim); border-radius: 8px; padding: 12px; margin: 12px 0; text-align: center;">
-                        <code id="code-${account.id}" style="font-size: 1.5em; font-weight: bold; letter-spacing: 3px;">${generateTOTP(account.secret)}</code>
-                    </div>
-                    <div style="width: 100%; height: 4px; background: var(--surface-variant); border-radius: 2px; overflow: hidden; margin-bottom: 12px;">
-                        <div class="progress-fill" id="progress-${account.id}" style="height: 100%; background: var(--primary); width: 100%; transition: width 0.1s linear;"></div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="outline" onclick="copyToClipboard('${account.id}')" style="flex: 1; margin: 0;">
+
+                    <progress id="progress-${account.id}" class="circle wavy" value="${(getRemainingTime() / 30) * 100}" max="100" style="margin-bottom: 12px;"></progress>
+
+                    <nav class="center-align tiny-space">
+                        <button class="outline" onclick="copyToClipboard('${account.id}')" style="flex: 1;">
                             <i>content_copy</i>
                         </button>
-                        <button class="outline" onclick="deleteAccount(${account.id})" style="flex: 1; margin: 0;">
+                        <button class="outline" onclick="deleteAccount(${account.id})" style="flex: 1;">
                             <i>delete</i>
                         </button>
-                    </div>
-                </div>
+                    </nav>
+                </article>
             `).join('');
         }
 
@@ -314,66 +313,26 @@
             // Placeholder for future settings
         }
 
-        // Update TOTP codes every second
+        // Update TOTP codes every 100ms
         setInterval(() => {
             accounts.forEach(account => {
                 const codeElement = document.getElementById(`code-${account.id}`);
                 const progressElement = document.getElementById(`progress-${account.id}`);
+                
                 if (codeElement) {
                     codeElement.textContent = generateTOTP(account.secret);
                 }
+                
                 if (progressElement) {
-                    const percentage = (getRemainingTime() / 30) * 100;
-                    progressElement.style.width = percentage + '%';
+                    const remainingTime = getRemainingTime();
+                    const percentage = (remainingTime / 30) * 100;
+                    progressElement.setAttribute('value', percentage);
                 }
             });
         }, 100);
 
         // Initial load
         loadAccounts();
-
-        // Tab styling
-        const style = document.createElement('style');
-        style.textContent = `
-            .tabs {
-                display: flex;
-                gap: 0;
-                border-bottom: 1px solid var(--outline);
-                margin: 0 -16px 16px -16px;
-            }
-            .tab-btn {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                padding: 12px;
-                border: none;
-                background: transparent;
-                cursor: pointer;
-                border-bottom: 3px solid transparent;
-                color: var(--on-surface-variant);
-                transition: all 0.3s ease;
-                text-transform: none;
-            }
-            .tab-btn.active {
-                color: var(--primary);
-                border-bottom-color: var(--primary);
-            }
-            .tab-btn:hover {
-                color: var(--on-surface);
-            }
-            .tab-content {
-                display: none;
-            }
-            .tab-content.active {
-                display: block;
-            }
-            main {
-                padding-top: 16px;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
