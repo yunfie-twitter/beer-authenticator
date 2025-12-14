@@ -15,8 +15,8 @@
     <!-- App Bar -->
     <header>
         <nav>
-            <button class="circle transparent">
-                <i>lock</i>
+            <button class="circle transparent" onclick="toggleMenu()">
+                <i>menu</i>
             </button>
             <h6 class="max">Beer Authenticator</h6>
             <button class="circle transparent" onclick="toggleSettings()">
@@ -26,100 +26,122 @@
     </header>
 
     <main>
-        <div class="row">
-            <!-- Add Account Panel -->
-            <article class="s12 m6" id="add-panel">
-                <div class="tabs min">
-                    <a class="vertical" onclick="switchTab(event, 'qr')"><i>qr_code_2</i>QRコード</a>
-                    <a class="vertical active" onclick="switchTab(event, 'manual')"><i>edit</i>手入力</a>
-                </div>
-
-                <!-- QR Code Tab -->
-                <div class="page padding left" id="qr-page">
-                    <h5>QRコードから追加</h5>
-                    <p>Google Authenticator や Microsoft Authenticator などのサービスから表示される QR コードを読み込んでください。</p>
-                    
-                    <div class="field label border" style="margin-top: 20px;">
-                        <input type="file" id="qr-file" accept="image/*" />
-                        <label>QRコード画像</label>
-                    </div>
-
-                    <p style="margin: 20px 0; opacity: 0.7; text-align: center;">または</p>
-
-                    <div class="field label border">
-                        <input type="file" id="qr-camera" accept="image/*" capture="environment" />
-                        <label>カメラで撮影</label>
-                    </div>
-
-                    <button onclick="readQRCode()" style="margin-top: 16px;">
-                        <i>upload</i>
-                        QRコードを読み込む
-                    </button>
-                    <canvas id="qr-canvas" style="display: none;"></canvas>
-                </div>
-
-                <!-- Manual Input Tab -->
-                <div class="page padding left active" id="manual-page">
-                    <h5>手動で追加</h5>
-                    <p>シークレットキーを直接入力して追加できます。</p>
-                    
-                    <div class="field label border" style="margin-top: 20px;">
-                        <input type="text" id="account-name" placeholder=" " />
-                        <label>アカウント名</label>
-                        <output>例: GitHub, Gmail, AWS</output>
-                    </div>
-
-                    <div class="field label border">
-                        <input type="text" id="issuer-name" placeholder=" " />
-                        <label>発行者 (オプション)</label>
-                        <output>例: github.com, google.com</output>
-                    </div>
-
-                    <div class="field label border">
-                        <input type="text" id="secret-key" placeholder=" " />
-                        <label>シークレットキー</label>
-                        <output>Base32 エンコードされたキーを入力してください</output>
-                    </div>
-
-                    <button onclick="addAccountManual()" style="margin-top: 16px;">
-                        <i>add</i>
-                        アカウントを追加
-                    </button>
-                </div>
-            </article>
-
-            <!-- Accounts List Panel -->
-            <article class="s12 m6" id="list-panel">
-                <h5>登録済みアカウント</h5>
-                <p style="opacity: 0.7;">
-                    <strong id="account-count">0</strong> 個のアカウントが登録されています
-                </p>
-
-                <div id="accounts-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
-                    <div style="padding: 32px 16px; text-align: center; opacity: 0.6;">
-                        <p>アカウントがまだ登録されていません</p>
-                        <p style="font-size: 0.9em;">左のパネルから追加してください</p>
-                    </div>
-                </div>
-            </article>
+        <!-- Accounts List -->
+        <div id="accounts-container" style="display: flex; flex-direction: column; gap: 12px; padding: 12px;">
+            <div style="padding: 32px 16px; text-align: center; opacity: 0.6;">
+                <p>アカウントがまだ登録されていません</p>
+                <p style="font-size: 0.9em;">可上の「⚠」ボタンをタップして追加してください</p>
+            </div>
         </div>
     </main>
+
+    <!-- FAB Button -->
+    <button class="extend border circle" onclick="openAddModal()" style="position: fixed; bottom: 24px; right: 24px; z-index: 999;">
+        <i>add</i>
+        <span>アカウントを追加</span>
+    </button>
+
+    <!-- Modal for Adding Account -->
+    <div class="overlay" id="add-modal" onclick="closeAddModal(event)" style="display: none;">
+        <article style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; z-index: 1000; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+            <header>
+                <button class="circle transparent" onclick="closeAddModal()">
+                    <i>close</i>
+                </button>
+                <h5 class="max">アカウントを追加</h5>
+            </header>
+
+            <div class="tabs min">
+                <a class="vertical" onclick="switchTab(event, 'qr')"><i>qr_code_2</i>QRコード</a>
+                <a class="vertical active" onclick="switchTab(event, 'manual')"><i>edit</i>手入力</a>
+            </div>
+
+            <!-- QR Code Tab -->
+            <div class="page padding left" id="qr-page">
+                <p>Google Authenticator や Microsoft Authenticator などのサービスから表示される QR コードを読み込んでください。</p>
+                
+                <div class="field label border" style="margin-top: 20px;">
+                    <input type="file" id="qr-file" accept="image/*" />
+                    <label>QRコード画像</label>
+                </div>
+
+                <p style="margin: 20px 0; opacity: 0.7; text-align: center;">または</p>
+
+                <div class="field label border">
+                    <input type="file" id="qr-camera" accept="image/*" capture="environment" />
+                    <label>カメラで撮影</label>
+                </div>
+
+                <button onclick="readQRCode()" style="margin-top: 16px;">
+                    <i>upload</i>
+                    QRコードを読み込む
+                </button>
+                <canvas id="qr-canvas" style="display: none;"></canvas>
+            </div>
+
+            <!-- Manual Input Tab -->
+            <div class="page padding left active" id="manual-page">
+                <p>シークレットキーを直接入力して追加できます。</p>
+                
+                <div class="field label border" style="margin-top: 20px;">
+                    <input type="text" id="account-name" placeholder=" " />
+                    <label>アカウント名</label>
+                    <output>例: GitHub, Gmail, AWS</output>
+                </div>
+
+                <div class="field label border">
+                    <input type="text" id="issuer-name" placeholder=" " />
+                    <label>発行者 (オプション)</label>
+                    <output>例: github.com, google.com</output>
+                </div>
+
+                <div class="field label border">
+                    <input type="text" id="secret-key" placeholder=" " />
+                    <label>シークレットキー</label>
+                    <output>Base32 エンコードされたキーを入力してください</output>
+                </div>
+
+                <button onclick="addAccountManual(); closeAddModal();" style="margin-top: 16px;">
+                    <i>add</i>
+                    アカウントを追加
+                </button>
+            </div>
+        </article>
+    </div>
 
     <script>
         const STORAGE_KEY = 'beer-authenticator-accounts';
         let accounts = [];
 
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('add-modal').style.display = 'flex';
+            // Reset to manual tab by default
+            resetTabs();
+        }
+
+        function closeAddModal(event) {
+            if (event && event.target.id !== 'add-modal') return;
+            document.getElementById('add-modal').style.display = 'none';
+        }
+
+        function resetTabs() {
+            document.querySelectorAll('#add-modal .tabs a').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#add-modal .page').forEach(page => page.classList.remove('active'));
+            
+            document.querySelectorAll('#add-modal .tabs a')[1].classList.add('active');
+            document.getElementById('manual-page').classList.add('active');
+        }
+
         // Tab switching
         function switchTab(e, tabName) {
             e.preventDefault();
             
-            // Update tab buttons
-            const addPanel = document.getElementById('add-panel');
-            addPanel.querySelectorAll('.tabs a').forEach(btn => btn.classList.remove('active'));
+            const modal = document.getElementById('add-modal');
+            modal.querySelectorAll('.tabs a').forEach(btn => btn.classList.remove('active'));
             e.target.closest('a').classList.add('active');
             
-            // Update pages
-            addPanel.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            modal.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(`${tabName}-page`).classList.add('active');
         }
 
@@ -194,6 +216,7 @@
 
                     if (code) {
                         parseOTPAuth(code.data);
+                        closeAddModal();
                     } else {
                         alert('QR コードが読み込めません');
                     }
@@ -258,38 +281,34 @@
         // Render accounts
         function renderAccounts() {
             const container = document.getElementById('accounts-container');
-            document.getElementById('account-count').textContent = accounts.length;
 
             if (accounts.length === 0) {
                 container.innerHTML = `
                     <div style="padding: 32px 16px; text-align: center; opacity: 0.6;">
                         <p>アカウントがまだ登録されていません</p>
-                        <p style="font-size: 0.9em;">左のパネルから追加してください</p>
+                        <p style="font-size: 0.9em;">可上の「⚠」ボタンをタップして追加してください</p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = accounts.map(account => `
-                <article>
-                    <h6 style="margin: 0 0 4px 0;">${escapeHtml(account.name)}</h6>
-                    <p style="margin: 0 0 12px 0; opacity: 0.7; font-size: 0.85em;">${escapeHtml(account.issuer)}</p>
-                    
-                    <div style="background: var(--surface-dim); border-radius: 8px; padding: 16px; margin-bottom: 12px; text-align: center;">
-                        <code id="code-${account.id}" style="font-size: 1.8em; font-weight: bold; letter-spacing: 4px; font-family: monospace;">${generateTOTP(account.secret)}</code>
-                    </div>
-
-                    <progress id="progress-${account.id}" class="circle wavy" value="${(getRemainingTime() / 30) * 100}" max="100" style="margin-bottom: 12px;"></progress>
-
-                    <nav class="center-align tiny-space">
-                        <button class="outline" onclick="copyToClipboard('${account.id}')" style="flex: 1;">
+                <div style="padding: 16px; border-bottom: 1px solid var(--outline);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <p style="margin: 0; font-size: 0.85em; opacity: 0.7;">${escapeHtml(account.issuer)}</p>
+                            <h6 style="margin: 4px 0 0 0;">${escapeHtml(account.name)}</h6>
+                        </div>
+                        <button class="circle transparent small" onclick="copyToClipboard('${account.id}')">
                             <i>content_copy</i>
                         </button>
-                        <button class="outline" onclick="deleteAccount(${account.id})" style="flex: 1;">
-                            <i>delete</i>
-                        </button>
-                    </nav>
-                </article>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+                        <code id="code-${account.id}" style="font-size: 1.5em; font-weight: bold; letter-spacing: 3px; font-family: monospace; flex: 1;">${generateTOTP(account.secret)}</code>
+                        <progress id="progress-${account.id}" class="circle wavy small" value="${(getRemainingTime() / 30) * 100}" max="100"></progress>
+                    </div>
+                </div>
             `).join('');
         }
 
@@ -308,9 +327,16 @@
             }
         }
 
+        // Menu toggle
+        function toggleMenu() {
+            // Placeholder for hamburger menu
+            alert('メニュー - 今後実装');
+        }
+
         // Settings toggle
         function toggleSettings() {
-            // Placeholder for future settings
+            // Placeholder for settings
+            alert('設定 - 今後実装');
         }
 
         // Update TOTP codes every 100ms
@@ -330,6 +356,13 @@
                 }
             });
         }, 100);
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAddModal();
+            }
+        });
 
         // Initial load
         loadAccounts();
